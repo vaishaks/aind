@@ -84,7 +84,30 @@ def depthFirstSearch(problem):
   print "Start's successors:", problem.getSuccessors(problem.getStartState())
   """
   "*** YOUR CODE HERE ***"
-  util.raiseNotDefined()
+  from collections import defaultdict
+  actions = util.Stack()
+  frontier = util.Stack()
+  explored = []  
+  parent_map = defaultdict(lambda: None)
+  frontier.push((problem.getStartState(), "Stop", 1))
+  while True:
+    if frontier.isEmpty():
+      return actions
+    (leaf_node, direction, val) = frontier.pop()
+    if problem.isGoalState(leaf_node):
+      current = (leaf_node, direction, val)
+      while current != None:
+        current_node, current_direction, curret_val = current
+        actions.push(current_direction)
+        current = parent_map[current_node]
+      return actions.list[::-1]
+    explored.append(leaf_node)
+    children = problem.getSuccessors(leaf_node)
+    for (child_node, child_direction, child_val) in children:
+      frontier_list = [frontier_node for (frontier_node, frontier_node_direction, frontier_node_val) in frontier.list]
+      if child_node not in frontier_list and child_node not in explored:
+        frontier.push((child_node, child_direction, child_val))
+        parent_map[child_node] = (leaf_node, direction, val)
 
 def breadthFirstSearch(problem):
   """
@@ -92,12 +115,78 @@ def breadthFirstSearch(problem):
   [2nd Edition: p 73, 3rd Edition: p 82]
   """
   "*** YOUR CODE HERE ***"
-  util.raiseNotDefined()
+  from collections import defaultdict
+  from game import Directions
+  node = problem.getStartState()
+  if problem.isGoalState(node):
+    return [Directions.STOP]
+  frontier = util.Queue()
+  frontier.push((node, Directions.STOP, 0))
+  explored = util.Stack()
+  actions = util.Stack()
+  parent_map = defaultdict(lambda: None)
+  while True:
+    if frontier.isEmpty():
+      return []
+    node, node_direction, node_cost = frontier.pop()
+    explored.push(node)
+    children = problem.getSuccessors(node)
+    for (child_node, child_direction, child_cost) in children:
+      frontier_list = [frontier_node for (frontier_node, frontier_node_direction, frontier_node_val) in frontier.list]
+      if child_node not in explored.list and child_node not in frontier_list:
+        if problem.isGoalState(child_node):
+          current = (child_node, child_direction, child_cost)
+          parent_map[child_node] = (node, node_direction, node_cost)
+          while current != None:
+            current_node, current_direction, curret_val = current
+            actions.push(current_direction)
+            current = parent_map[current_node]                      
+          actions.list.remove(Directions.STOP)
+          return actions.list[::-1]
+        frontier.push((child_node, child_direction, child_cost))
+        parent_map[child_node] = (node, node_direction, node_cost)
       
 def uniformCostSearch(problem):
   "Search the node of least total cost first. "
   "*** YOUR CODE HERE ***"
-  util.raiseNotDefined()
+  from collections import defaultdict
+  from game import Directions
+  node = problem.getStartState()
+  frontier = util.PriorityQueue()
+  frontier.push((node, Directions.STOP, 0), 0)
+  explored = util.Stack()
+  actions = util.Stack()
+  parent_map = defaultdict(lambda: None)
+  while True:
+    if frontier.isEmpty():
+      return []
+    node, node_direction, node_cost = frontier.pop()
+    if problem.isGoalState(node):
+      current = (node, node_direction, node_cost)
+      while current != None:
+        current_node, current_direction, curret_val = current
+        actions.push(current_direction)
+        current = parent_map[current_node]                      
+      actions.list.remove(Directions.STOP)
+      return actions.list[::-1]
+    explored.push(node)
+    children = problem.getSuccessors(node)
+    for (child_node, child_direction, child_cost) in children:
+      frontier_list = []
+      frontier_cost = {}
+      frontier_item = ""
+      for (priority, (frontier_node, frontier_node_direction, frontier_node_cost)) in frontier.heap:
+        frontier_list.append(frontier_node)
+        frontier_cost[frontier_node] = frontier_cost
+        if frontier_node == child_node:
+          frontier_item = (priority, (frontier_node, frontier_node_direction, frontier_node_cost))            
+      if child_node not in explored.list and child_node not in frontier_list:
+        frontier.push((child_node, child_direction, child_cost+node_cost), child_cost+node_cost)
+        parent_map[child_node] = (node, node_direction, node_cost)
+      elif child_node in frontier_list and child_cost+node_cost < frontier_cost[child_node]:
+        frontier.heap.remove(frontier_item)
+        frontier.push((child_node, child_direction, child_cost+node_cost), child_cost+node_cost)      
+
 
 def nullHeuristic(state, problem=None):
   """
