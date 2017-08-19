@@ -194,40 +194,34 @@ def aStarSearch(problem, heuristic=nullHeuristic):
   from game import Directions
   node = problem.getStartState()
   frontier = util.PriorityQueue()
-  frontier.push((node, Directions.STOP, 0), 0)
+  frontier.push((node, Directions.STOP, 0, [Directions.STOP]), 0)
   explored = util.Stack()
   actions = util.Stack()
   parent_map = defaultdict(lambda: None)
   while True:
     if frontier.isEmpty():
       return []
-    node, node_direction, node_cost = frontier.pop()
+    node, node_direction, node_cost, node_actions = frontier.pop()
     if problem.isGoalState(node):
-      current = (node, node_direction, node_cost)
-      while current != None:
-        current_node, current_direction, curret_val = current
-        actions.push(current_direction)
-        current = parent_map[current_node]                      
-      actions.list.remove(Directions.STOP)
-      return actions.list[::-1]
+      print node_actions
+      return node_actions
     explored.push(node)
     children = problem.getSuccessors(node)
     for (child_node, child_direction, child_cost) in children:
       frontier_list = []
       frontier_cost = {}
       frontier_item = ""
-      for (priority, (frontier_node, frontier_node_direction, frontier_node_cost)) in frontier.heap:
+      for (priority, (frontier_node, frontier_node_direction, frontier_node_cost, frontier_node_actions)) in frontier.heap:
         frontier_list.append(frontier_node)
-        frontier_cost[frontier_node] = frontier_cost
-        if frontier_node == child_node:
-          frontier_item = (priority, (frontier_node, frontier_node_direction, frontier_node_cost))            
+        frontier_cost[frontier_node[0]] = frontier_cost
+        if frontier_node[0] == child_node[0]:
+          frontier_item = (priority, (frontier_node, frontier_node_direction, frontier_node_cost, frontier_node_actions))            
       total_cost = (child_cost + node_cost) + heuristic(child_node, problem)
       if child_node not in explored.list and child_node not in frontier_list:        
-        frontier.push((child_node, child_direction, total_cost), total_cost)
-        parent_map[child_node] = (node, node_direction, node_cost)
-      elif child_node in frontier_list and total_cost < frontier_cost[child_node]:
+        frontier.push((child_node, child_direction, total_cost, node_actions + [child_direction]), total_cost)
+      elif child_node in frontier_list and total_cost < frontier_cost[child_node[0]]:
         frontier.heap.remove(frontier_item)
-        frontier.push((child_node, child_direction, total_cost), total_cost)  
+        frontier.push((child_node, child_direction, total_cost, node_actions  + [child_direction]), total_cost)  
     
   
 # Abbreviations

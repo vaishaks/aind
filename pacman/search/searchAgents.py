@@ -282,11 +282,6 @@ class CornersProblem(search.SearchProblem):
         print 'Warning: no food in corner ' + str(corner)
         self.corners_visited_map[corner] = True    
 
-  def __get_manhattan_distance(self, start, end):
-    xy1 = start
-    xy2 = end
-    return abs(xy1[0] - xy2[0]) + abs(xy1[1] - xy2[1])    
-
   def getStartState(self):
     "Returns the start state (in your state space, not the full Pacman state space)"
     "*** YOUR CODE HERE ***"
@@ -347,6 +342,10 @@ class CornersProblem(search.SearchProblem):
       if self.walls[x][y]: return 999999
     return len(actions)
 
+def __get_manhattan_distance(start, end):
+  xy1 = start
+  xy2 = end
+  return abs(xy1[0] - xy2[0]) + abs(xy1[1] - xy2[1])    
 
 def cornersHeuristic(state, problem):
   """
@@ -364,8 +363,11 @@ def cornersHeuristic(state, problem):
   corners = problem.corners # These are the corner coordinates
   walls = problem.walls # These are the walls of the maze, as a Grid (game.py)
   
-  "*** YOUR CODE HERE ***"  
-  return manhattanHeuristic(state, problem)
+  "*** YOUR CODE HERE ***"
+  x, y, corners_visited = state
+  corners_not_visited = [corner for corner in corners if corners not in corners_visited]
+  minimum, point = min([(__get_manhattan_distance((x, y), corner), corner) for corner in corners_not_visited], key=lambda p: p[0])
+  return minimum
 
 class AStarCornersAgent(SearchAgent):
   "A SearchAgent for FoodSearchProblem using A* and your foodHeuristic"
