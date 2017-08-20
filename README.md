@@ -6,3 +6,7 @@
 #### 2. Diagonal Sudoku Solver
 - This project uses constraint propagation and depth first search to solve a diagonal sudoku puzzle
 - The sudoku solver can be vizualized using pygame
+#### 3. Pacman
+- This project implements Breadth First Search, Depth First Search, Uniform Cost Search and A* Search.
+- The project also includes heuristics for finding food dots in a pacman maze
+- To play regular pacman, run `python pacman.py` in the project root
