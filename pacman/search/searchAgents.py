@@ -487,6 +487,11 @@ class ClosestDotSearchAgent(SearchAgent):
     self.actionIndex = 0
     print 'Path found with cost %d.' % len(self.actions)
     
+  def __get_manhattan_distance(self, start, end):
+    xy1 = start
+    xy2 = end
+    return abs(xy1[0] - xy2[0]) + abs(xy1[1] - xy2[1])  
+
   def findPathToClosestDot(self, gameState):
     "Returns a path (a list of actions) to the closest dot, starting from gameState"
     # Here are some useful elements of the startState
@@ -496,7 +501,12 @@ class ClosestDotSearchAgent(SearchAgent):
     problem = AnyFoodSearchProblem(gameState)
 
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    food_list = food.asList()
+    minimum, position = min([(self.__get_manhattan_distance(startPosition, food_position), food_position) for food_position in food_list], key=lambda p: p[0])
+    problem.goal = position
+    from search import bfs
+    path = bfs(problem)
+    return path
   
 class AnyFoodSearchProblem(PositionSearchProblem):
   """
@@ -532,7 +542,9 @@ class AnyFoodSearchProblem(PositionSearchProblem):
     x,y = state
     
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    if (x, y) == self.goal:
+      return True
+    return False
 
 ##################
 # Mini-contest 1 #
