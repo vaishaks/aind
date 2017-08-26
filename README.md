@@ -10,3 +10,5 @@
 - This project implements Breadth First Search, Depth First Search, Uniform Cost Search and A* Search.
 - The project also includes heuristics for finding food dots in a pacman maze
 - To play regular pacman, run `python pacman.py` in the project root
+#### 4. Simulated Annealing
+- This short lab project uses simulated annealing to solve the Travelling Salesman Problem
