@@ -12,3 +12,5 @@
 - To play regular pacman, run `python pacman.py` in the project root
 #### 4. Simulated Annealing
 - This short lab project uses simulated annealing to solve the Travelling Salesman Problem
+#### 5. Constraint Satisfaction
+- This short lab project uses constraint propagation to solve the 8 Queens problem
