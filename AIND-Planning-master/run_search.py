@@ -50,7 +50,6 @@ class PrintableProblem(InstrumentedProblem):
 
 
 def run_search(problem, search_function, parameter=None):
-
     start = timer()
     ip = PrintableProblem(problem)
     if parameter is not None:
