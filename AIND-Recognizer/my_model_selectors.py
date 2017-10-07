@@ -68,16 +68,28 @@ class SelectorBIC(ModelSelector):
     Bayesian information criteria: BIC = -2 * logL + p * logN
     """
 
+    def get_model_score(self, n):
+        X, l = combine_sequences(range(len(self.sequences)), self.sequences)
+        model = self.base_model(n)
+        return -2 * model.score(X, l) + (n**2 + 2*n*model.n_features - 1) * math.log(len(self.sequences))
+
     def select(self):
-        """ select the best model for self.this_word based on
-        BIC score for n between self.min_n_components and self.max_n_components
+        """ select based on BIC
 
         :return: GaussianHMM object
         """
-        warnings.filterwarnings("ignore", category=DeprecationWarning)
-
-        # TODO implement model selection based on BIC scores
-        raise NotImplementedError
+        try:
+            warnings.filterwarnings("ignore", category=DeprecationWarning)
+            best_score_so_far = float("Inf")
+            for n_components in range(self.min_n_components, self.max_n_components + 1):
+                model_score = self.get_model_score(n_components)
+                if model_score < best_score_so_far:
+                    self.X, self.lengths = combine_sequences(range(len(self.sequences)), self.sequences)
+                    model = self.base_model(n_components)
+                    best_score_so_far = model_score
+            return model
+        except Exception:
+            return self.base_model(self.n_constant)    
 
 
 class SelectorDIC(ModelSelector):
@@ -90,11 +102,31 @@ class SelectorDIC(ModelSelector):
     DIC = log(P(X(i)) - 1/(M-1)SUM(log(P(X(all but i))
     '''
 
-    def select(self):
-        warnings.filterwarnings("ignore", category=DeprecationWarning)
+    def get_model_score(self, n):
+        model = self.base_model(n)
+        scores = []
+        for word, (X, l) in self.hwords.items():
+            if word != self.this_word:
+                scores.append(model.score(X, l))
+        return model.score(self.X, self.lengths) - np.mean(scores)
 
-        # TODO implement model selection based on DIC scores
-        raise NotImplementedError
+    def select(self):
+        """ select based on DIC
+
+        :return: GaussianHMM object
+        """        
+        try:
+            warnings.filterwarnings("ignore", category=DeprecationWarning)
+            best_score_so_far = float("-Inf")
+            for n_components in range(self.min_n_components, self.max_n_components + 1):
+                model_score = self.get_model_score(n_components)
+                if model_score > best_score_so_far:
+                    self.X, self.lengths = combine_sequences(range(len(self.sequences)), self.sequences)
+                    model = self.base_model(n_components)
+                    best_score_so_far = model_score
+            return model
+        except Exception:
+            return self.base_model(self.n_constant)        
 
 
 class SelectorCV(ModelSelector):
@@ -102,8 +134,31 @@ class SelectorCV(ModelSelector):
 
     '''
 
-    def select(self):
-        warnings.filterwarnings("ignore", category=DeprecationWarning)
+    def get_model_score(self, n):
+        split_method = KFold(n_splits=2)
+        scores = []
+        for cv_train_idx, cv_test_idx in split_method.split(self.sequences):
+            self.X, self.lengths = combine_sequences(cv_train_idx, self.sequences)
+            model = self.base_model(n)
+            X, l = combine_sequences(cv_test_idx, self.sequences)
+            logL = model.score(X, l)
+            scores.append(logL)
+        return np.mean(scores)
 
-        # TODO implement model selection using CV
-        raise NotImplementedError
+    def select(self):
+        """ select based on CV
+
+        :return: GaussianHMM object
+        """        
+        try:
+            warnings.filterwarnings("ignore", category=DeprecationWarning)
+            best_score_so_far = float("Inf")
+            for n_components in range(self.min_n_components, self.max_n_components + 1):
+                model_score = self.get_model_score(n_components)
+                if model_score < best_score_so_far:
+                    self.X, self.lengths = combine_sequences(range(len(self.sequences)), self.sequences)
+                    model = self.base_model(n_components)
+                    best_score_so_far = model_score
+            return model
+        except Exception:
+            return self.base_model(self.n_constant)    
