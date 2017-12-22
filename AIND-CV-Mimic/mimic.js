@@ -134,6 +134,7 @@ detector.addEventListener("onImageResultsSuccess", function(faces, image, timest
 
     // TODO: Call your function to run the game (define it first!)
     // <your code here>
+    updateGame(faces[0].emojis.dominantEmoji);
   }
 });
 
@@ -148,6 +149,8 @@ function drawFeaturePoints(canvas, img, face) {
   // TODO: Set the stroke and/or fill style you want for each feature point marker
   // See: https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D#Fill_and_stroke_styles
   // <your code here>
+  ctx.fillStyle = 'white';
+  ctx.strokeStyle = 'white';
   
   // Loop over each feature point in the face
   for (var id in face.featurePoints) {
@@ -156,6 +159,9 @@ function drawFeaturePoints(canvas, img, face) {
     // TODO: Draw feature point, e.g. as a circle using ctx.arc()
     // See: https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/arc
     // <your code here>
+    ctx.beginPath();
+    ctx.arc(featurePoint.x, featurePoint.y, 2, 0, 2 * Math.PI);
+    ctx.stroke();
   }
 }
 
@@ -166,11 +172,12 @@ function drawEmoji(canvas, img, face) {
 
   // TODO: Set the font and style you want for the emoji
   // <your code here>
-  
+  ctx.font = '48px serif';
   // TODO: Draw it using ctx.strokeText() or fillText()
   // See: https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/fillText
   // TIP: Pick a particular feature point as an anchor so that the emoji sticks to your face
-  // <your code here>
+  // <your code here>  
+  ctx.fillText(face.emojis.dominantEmoji, face.featurePoints[10].x, face.featurePoints[10].y);
 }
 
 // TODO: Define any variables and functions to implement the Mimic Me! game mechanics
@@ -187,3 +194,17 @@ function drawEmoji(canvas, img, face) {
 // - Define a game reset function (same as init?), and call it from the onReset() function above
 
 // <your code here>
+var mimicEmoji;
+var score = 0;
+function updateGame(current) {
+  var isMimic = false;
+  if (mimicEmoji == toUnicode(current)) {
+    isMimic = true;
+    setScore(++score, score);
+  }
+  if (!mimicEmoji || isMimic) {
+    var n = Math.floor(Math.random() * 12);
+    mimicEmoji = emojis[n];
+  }
+  setTargetEmoji(mimicEmoji);
+}
